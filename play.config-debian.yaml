@@ -10,6 +10,24 @@
     - name: debug virtualization tech
       debug:
         msg: "{{ virt_type }}"
+    
+    - name: create ansible user
+      user:
+        name: ansible
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+
+    - name: copy public key
+      authorized_key:
+        user: ansible
+        state: present
+        key: "{{ lookup('file', '/home/ansible/.ssh/id_rsa.pub')}}"
+
+    - name: allow passwordless sudo
+      copy:
+        content: "ansible ALL=(ALL) NOPASSWD: ALL"
+        dest: /etc/sudoers.d/ansible
 
     - name: update all packages to their latest version
       apt:
