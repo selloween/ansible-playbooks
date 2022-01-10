@@ -2,7 +2,14 @@
 - name: configure debian
   hosts: all
   become: yes
+  vars:
+    virt_item: "lxc"
+    virt_type: "{{ ansible_virtualization_tech_guest }}"
   tasks:
+    
+    - name: debug virtualization tech
+      debug:
+        msg: "{{ virt_type }}"
 
     - name: update all packages to their latest version
       apt:
@@ -23,11 +30,18 @@
           - dnsutils
           - net-tools
           - tmux
+        state: latest
+
+    - name: install essential packages
+      apt:
+        pkg:
           - ufw
           - fail2ban
         state: latest
+      when: virt_item not in virt_type
 
     - name: configure ufw
+      when: virt_item not in virt_type
       block:
         
         - name: configure ufw defaults
@@ -57,5 +71,3 @@
           systemd:
             name: ufw
             state: started
-
-
